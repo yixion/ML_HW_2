@@ -1,0 +1,17 @@
+# python 快取
+__pycache__ 
+
+# .pyc, .pyo 等編譯快取
+*.py[cod] 
+
+.venv/
+.pytest_cache/
+
+# 訓練產生的模型權重
+models/*.npz 
+
+#程式輸出結果
+output/*
+
+# 例外: 保留空的 output 資料夾
+!output/.gitkeep
