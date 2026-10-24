@@ -15,3 +15,6 @@ output/*
 
 # 例外: 保留空的 output 資料夾
 !output/.gitkeep
+
+*.swp
+*.swo
