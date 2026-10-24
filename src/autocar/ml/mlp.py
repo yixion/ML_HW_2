@@ -24,15 +24,32 @@ class MLPRegressor:
         if (~np.isfinite(features)).any():
             raise ValueError("ple preprocessing your data")
         self.layer_outputs = []
+        self.layer_inputs =[]
         layer_input = np.insert(features, 0,-1, axis=1)
+        self.layer_inputs.append(layer_input)
         for i in range(len(self.hidden_sizes)):
             layer_output = layer_input @ self.W[i]
             layer_output = self.sigmoid(layer_output)
             self.layer_outputs.append(layer_output)
             layer_input = np.insert(layer_output,0,-1,axis=1)
+            self.layer_inputs.append(layer_input)
         layer_output = layer_input @ self.W[len(self.hidden_sizes)]
         self.layer_outputs.append(layer_output)
         return layer_output
+
+
+def mean_squared_error(target,predictions):
+    if (target.shape != predictions.shape
+        or not np.isfinite(target).all()
+        or not np.isfinite(predictions).all()
+        or target.ndim != 2
+        or predictions.ndim != 2):
+            raise ValueError("wrong value of mean squared error")
+    
+    loss = np.mean((target-predictions)**2)    
+    return loss
+
+
 if __name__ == "__main__":
     model = MLPRegressor(
         input_size=1,
@@ -55,5 +72,5 @@ if __name__ == "__main__":
         [1.0],
     ])
     transform = model.forward(features)
-    print(transform)
-    print(2.0*(1/(1+np.exp((-1.0)*features)))+0.5)
+    print(mean_squared_error(model.W[1],features))
+

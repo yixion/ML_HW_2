@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from autocar.ml.mlp import MLPRegressor
+from autocar.ml.mlp import (MLPRegressor,mean_squared_error,)
 
 
 def test_parameter_shapes_with_tuple_hidden_sizes():
@@ -198,3 +198,73 @@ def test_forward_rejects_non_finite_values(
 
     with pytest.raises(ValueError):
         model.forward(features)
+
+
+def test_mean_squared_error_returns_expected_value():
+    predictions = np.array([
+        [1.0],
+        [3.0],
+    ])
+    targets = np.array([
+        [2.0],
+        [5.0],
+    ])
+
+    loss = mean_squared_error(
+        predictions,
+        targets,
+    )
+
+    assert loss == pytest.approx(2.5)
+
+
+def test_forward_cache_shapes():
+    model = MLPRegressor(
+        input_size=3,
+        hidden_sizes=(4, 2),
+        seed=42,
+    )
+    features = np.zeros((5, 3))
+
+    model.forward(features)
+
+    expected_input_shapes = [
+        (5, 4),
+        (5, 5),
+        (5, 3),
+    ]
+    expected_output_shapes = [
+        (5, 4),
+        (5, 2),
+        (5, 1),
+    ]
+
+    assert [
+        values.shape
+        for values in model.layer_inputs
+    ] == expected_input_shapes
+
+    assert [
+        values.shape
+        for values in model.layer_outputs
+    ] == expected_output_shapes
+
+
+def test_forward_resets_cached_values():
+    model = MLPRegressor(
+        input_size=3,
+        hidden_sizes=(4, 2),
+        seed=42,
+    )
+
+    model.forward(np.zeros((5, 3)))
+    model.forward(np.zeros((2, 3)))
+
+    assert len(model.layer_inputs) == len(model.W)
+    assert len(model.layer_outputs) == len(model.W)
+
+    for values in model.layer_inputs:
+        assert values.shape[0] == 2
+
+    for values in model.layer_outputs:
+        assert values.shape[0] == 2
