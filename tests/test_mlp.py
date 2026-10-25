@@ -394,3 +394,19 @@ def test_fit_rejects_mismatched_sample_counts():
             epochs=1,
             batch_size=2,
         )
+def test_predict_matches_forward():
+    model = MLPRegressor(
+        input_size=3,
+        hidden_sizes=(4, 2),
+        seed=42,
+    )
+    features = np.zeros((5, 3))
+
+    expected = model.forward(features)
+    predictions = model.predict(features)
+
+    np.testing.assert_allclose(
+        predictions,
+        expected,
+    )
+    assert predictions.shape == (5, 1)

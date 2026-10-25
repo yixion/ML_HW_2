@@ -89,8 +89,14 @@ class MLPRegressor:
             self.loss_history.append(loss)
         return self.loss_history
 
-
-
+    def predict(self, features):
+        x = np.insert(features, 0, -1, axis=1)
+        for i in range(len(self.hidden_sizes)): 
+            x = x @ self.W[i]
+            x = self.sigmoid(x)
+            x = np.insert(x,0,-1,axis=1)
+        x = x @ self.W[-1]
+        return x
         
 def mean_squared_error(predictions,target):
     if (target.shape != predictions.shape
