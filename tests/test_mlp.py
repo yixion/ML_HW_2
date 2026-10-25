@@ -268,3 +268,56 @@ def test_forward_resets_cached_values():
 
     for values in model.layer_outputs:
         assert values.shape[0] == 2
+def test_backward_before_forward_raises_runtime_error():
+    model = MLPRegressor(
+        input_size=1,
+        hidden_sizes=(1,),
+        seed=42,
+    )
+
+    targets = np.array([[1.0]])
+
+    with pytest.raises(RuntimeError):
+        model.backward(targets)
+def test_backward_updates_weights_with_expected_values():
+    model = MLPRegressor(
+        input_size=1,
+        hidden_sizes=(1,),
+        seed=42,
+    )
+    model.l_r = 0.1
+
+    model.W[0] = np.array([
+        [0.0],  # threshold weight
+        [0.0],  # input weight
+    ])
+
+    model.W[1] = np.array([
+        [0.0],  # threshold weight
+        [2.0],  # hidden-to-output weight
+    ])
+
+    features = np.array([[0.0]])
+    targets = np.array([[2.0]])
+
+    model.forward(features)
+    model.backward(targets)
+
+    expected_first_layer_weights = np.array([
+        [-0.05],
+        [0.0],
+    ])
+
+    expected_output_layer_weights = np.array([
+        [-0.1],
+        [2.05],
+    ])
+
+    np.testing.assert_allclose(
+        model.W[0],
+        expected_first_layer_weights,
+    )
+    np.testing.assert_allclose(
+        model.W[1],
+        expected_output_layer_weights,
+    )
