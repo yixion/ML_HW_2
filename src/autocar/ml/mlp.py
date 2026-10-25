@@ -63,10 +63,36 @@ class MLPRegressor:
         for i in range(len(self.W)):
             # input 的 shape = (batch size, input feature 個數)
             self.W[i] = self.W[i] + self.l_r * self.layer_inputs[i].T@self.delta_list[i]/batch_size
-        print((self.layer_inputs[0].T@self.delta_list[0]).shape)
-        print(self.W[0].shape)
+    def fit(self, features, targets, epochs=100, batch_size=32,shuffle=True):
+        if (features.ndim != 2
+            or targets.ndim != 2 
+            or features.shape[0] != targets.shape[0]
+            or not np.isfinite(features).all()
+            or not np.isfinite(targets).all()
+            ):
+            raise ValueError("something went wrong about the dataset.")
+        if epochs<=0 or batch_size <=0:
+            raise ValueError("Pls setting right value of training parameters.")
+        self.loss_history = []
+        sample_count = features.shape[0]
+        for i in range(epochs):
+            if shuffle:
+                indices = self.rng.permutation(sample_count)
+            else:
+                indices = np.arange(sample_count)
+            for start in range(0, sample_count, batch_size):
+                batch_features = features[indices[start:start+batch_size]]
+                batch_targets = targets[indices[start:start+batch_size]]
+                self.forward(batch_features)
+                self.backward(batch_targets)
+            loss = mean_squared_error(self.forward(features),targets)
+            self.loss_history.append(loss)
+        return self.loss_history
+
+
+
         
-def mean_squared_error(target,predictions):
+def mean_squared_error(predictions,target):
     if (target.shape != predictions.shape
         or not np.isfinite(target).all()
         or not np.isfinite(predictions).all()
@@ -85,20 +111,25 @@ if __name__ == "__main__":
         seed=42,
     )
 
-    # 第一列是一般 weight，最後一列是 bias。
-    model.W[0] = np.array([
-        [0.0],
-        [1.0],
-    ])
-    model.W[1] = np.array([
-        [-0.5],
-        [2.0],
-    ])
+    features = np.zeros((5, 1))
+    targets = np.ones((5, 1))
 
-    features = np.array([
-        [0.0],
-        [1.0],
-    ])
-    transform = model.forward(features)
-    model.backward(features)
-    print(model.delta_list)
+    observed_batch_sizes = []
+    original_backward = model.backward
+
+    def recording_backward(batch_targets):
+        observed_batch_sizes.append(
+            batch_targets.shape[0]
+        )
+        original_backward(batch_targets)
+
+    model.backward = recording_backward
+
+    model.fit(
+        features,
+        targets,
+        epochs=1,
+        batch_size=2,
+        shuffle=False,
+    )
+

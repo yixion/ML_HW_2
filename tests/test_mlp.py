@@ -321,3 +321,76 @@ def test_backward_updates_weights_with_expected_values():
         model.W[1],
         expected_output_layer_weights,
     )
+def test_fit_returns_decreasing_loss_history():
+    model = MLPRegressor(
+        input_size=1,
+        hidden_sizes=(1,),
+        seed=42,
+    )
+    model.l_r = 0.1
+
+    # 使用固定權重，避免測試受隨機初始化影響
+    model.W[0] = np.zeros((2, 1))
+    model.W[1] = np.zeros((2, 1))
+
+    features = np.zeros((4, 1))
+    targets = np.ones((4, 1))
+
+    history = model.fit(
+        features,
+        targets,
+        epochs=20,
+        batch_size=2,
+        shuffle=True,
+    )
+
+    assert len(history) == 20
+    assert np.isfinite(history).all()
+    assert history[-1] < history[0]
+def test_fit_uses_incomplete_final_batch():
+    model = MLPRegressor(
+        input_size=1,
+        hidden_sizes=(1,),
+        seed=42,
+    )
+
+    features = np.zeros((5, 1))
+    targets = np.ones((5, 1))
+
+    observed_batch_sizes = []
+    original_backward = model.backward
+
+    def recording_backward(batch_targets):
+        observed_batch_sizes.append(
+            batch_targets.shape[0]
+        )
+        original_backward(batch_targets)
+
+    model.backward = recording_backward
+
+    model.fit(
+        features,
+        targets,
+        epochs=1,
+        batch_size=2,
+        shuffle=False,
+    )
+
+    assert observed_batch_sizes == [2, 2, 1]
+def test_fit_rejects_mismatched_sample_counts():
+    model = MLPRegressor(
+        input_size=1,
+        hidden_sizes=(1,),
+        seed=42,
+    )
+
+    features = np.zeros((5, 1))
+    targets = np.zeros((4, 1))
+
+    with pytest.raises(ValueError):
+        model.fit(
+            features,
+            targets,
+            epochs=1,
+            batch_size=2,
+        )
