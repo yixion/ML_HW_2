@@ -3,6 +3,7 @@ import pytest
 
 from autocar.simulation.geometry import (
     ray_segment_intersection_distance,
+    point_to_segment_distance,
 )
 
 
@@ -50,3 +51,38 @@ def test_ray_returns_none_without_valid_intersection(
     )
 
     assert distance is None
+@pytest.mark.parametrize(
+    "point, expected_distance",
+    [
+        # 投影在線段中間，最近點為 (4, 0)
+        (
+            np.array([4.0, 3.0]),
+            3.0,
+        ),
+
+        # 投影在線段起點左側，最近點為 (0, 0)
+        (
+            np.array([-2.0, 3.0]),
+            np.sqrt(13.0),
+        ),
+
+        # 投影在線段終點右側，最近點為 (10, 0)
+        (
+            np.array([12.0, 3.0]),
+            np.sqrt(13.0),
+        ),
+    ],
+)
+def test_point_to_segment_distance(
+    point,
+    expected_distance,
+):
+    distance = point_to_segment_distance(
+        point=point,
+        segment_start=np.array([0.0, 0.0]),
+        segment_end=np.array([10.0, 0.0]),
+    )
+
+    assert distance == pytest.approx(
+        expected_distance
+    )

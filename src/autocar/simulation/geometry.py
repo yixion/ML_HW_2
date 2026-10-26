@@ -22,4 +22,20 @@ def ray_segment_intersection_distance(
         #print(f"{t} and {u} intersection is not on this line segment")
         None
 
-
+def point_to_segment_distance(
+        point,
+        segment_start,
+        segment_end,
+        ):
+    segment = segment_end - segment_start
+    segment_len = np.dot(segment,segment)
+    if np.isclose(segment_len, 0.0):
+        return np.linalg.norm(point-segment_start)
+    u = np.dot((point - segment_start),segment)/np.dot(segment,segment)
+#    if u < 0:
+#        u = 0
+#    elif u>1:
+#        u = 1
+    u = np.clip(u,0.0,1.0)
+    closest = segment_start + u*segment
+    return np.linalg.norm(point-closest)
