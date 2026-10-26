@@ -7,7 +7,7 @@ def ray_segment_intersection_distance(
         ray_direction,
         segment_start,
         segment_end,
-    ):
+        ):
     s = segment_end - segment_start
     difference = segment_start - ray_origin
     denominator = cross_2d(ray_direction,s)
@@ -19,7 +19,7 @@ def ray_segment_intersection_distance(
     if t >= 0.0 and u >= 0.0 and u <= 1.0:
         return t
     else:
-        print(f"{t} and {u} intersection is not on this line segment")
+        #print(f"{t} and {u} intersection is not on this line segment")
         None
 
 
