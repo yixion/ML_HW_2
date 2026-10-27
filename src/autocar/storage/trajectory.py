@@ -1,4 +1,5 @@
 from autocar.simulation.simulator import SimulationRecord
+from pathlib import Path
 import numpy as np
 
 
@@ -17,3 +18,15 @@ def save_6d_trajectory(path,records):
     for index, record in enumerate(records):
         data[index] = np.array([record.x, record.y, record.front_distance,record.right_distance,record.left_distance,record.steering_degrees])
     np.savetxt(path, data,fmt="%.7f", delimiter=" ")
+
+def _load_trajectory(path,expected_columns):
+    path = Path(path) 
+    trajectory_data = np.loadtxt(path,ndmin=2)
+    print(type(trajectory_data))
+    if trajectory_data.shape[1] != expected_columns or not np.isfinite(trajectory_data).all():
+        raise ValueError("loading trajectory Error")
+    return trajectory_data
+def load_4d_trajectory(path):
+    return _load_trajectory(path,expected_columns=4)
+def load_6d_trajectory(path):
+    return _load_trajectory(path,expected_columns=6)

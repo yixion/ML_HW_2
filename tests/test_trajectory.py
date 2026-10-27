@@ -1,9 +1,12 @@
 import pytest
+import numpy as np
 
 from autocar.simulation.simulator import (
     SimulationRecord,
 )
 from autocar.storage.trajectory import (
+    load_4d_trajectory,
+    load_6d_trajectory,
     save_4d_trajectory,
     save_6d_trajectory,
 )
@@ -104,3 +107,51 @@ def test_save_trajectory_rejects_empty_records(
             tmp_path / filename,
             [],
         )
+@pytest.mark.parametrize(
+    "load_function, column_count",
+    [
+        (load_4d_trajectory, 4),
+        (load_6d_trajectory, 6),
+    ],
+)
+def test_load_trajectory_returns_2d_array(
+    tmp_path,
+    load_function,
+    column_count,
+):
+    path = tmp_path / "trajectory.txt"
+    expected = np.arange(
+        column_count,
+        dtype=float,
+    ).reshape(1, column_count)
+
+    np.savetxt(path, expected)
+
+    actual = load_function(path)
+
+    assert actual.shape == (1, column_count)
+    np.testing.assert_allclose(
+        actual,
+        expected,
+    )
+@pytest.mark.parametrize(
+    "load_function, wrong_column_count",
+    [
+        (load_4d_trajectory, 3),
+        (load_6d_trajectory, 5),
+    ],
+)
+def test_load_trajectory_rejects_wrong_columns(
+    tmp_path,
+    load_function,
+    wrong_column_count,
+):
+    path = tmp_path / "invalid_trajectory.txt"
+    invalid_data = np.zeros(
+        (2, wrong_column_count),
+    )
+
+    np.savetxt(path, invalid_data)
+
+    with pytest.raises(ValueError):
+        load_function(path)
