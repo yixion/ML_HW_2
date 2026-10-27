@@ -1,16 +1,30 @@
-from autocar.ml.training import (train_4d_model,train_6d_model)
-from autocar.mlp.mlp import MLPRegressor
-from autocar.mlp.preprocessing import StandardScaler
-from autocar.simulation.sensors import measure_sensor_distances
-from autocar.simulation.vehicle import Vehicle
+from autocar.storage.model_io import (save_model, load_model)
+from autocar.ml.training import (train_4d_model,train_6d_model) 
 from autocar.simulation.simulator import Simulator
-from autocar.storage.model_io import save_model
+from autocar.simulation.vehicle import Vehicle
+from autocar.simulation.track import load_track
 from pathlib import Path
-import numpy as np
 
 def main() -> None:
-    s = Simulator()
-    
+    project_root = Path(__file__).resolve().parent
+    track_path = project_root / "data"/ "track.txt"
+    model_path = project_root / "models" / "mlp_4d.npz" 
+    data_path = project_root / "data" / "train4dAll.txt"
+    # 4D mlp
+    track = load_track(track_path)
+    model,scaler = load_model(model_path)
+    if model is None and scaler is None:
+        model, scaler, loss_history, matrics = train_4d_model(data_path)
+        save_model(model_path,model, scaler)  
+    vehicle = Vehicle(track.start_position[0], track.start_position[1],track.start_position[2])
+
+    simulator = Simulator(track, vehicle, model, scaler) 
+    status = simulator.run(max_steps=1000,)
+    print("status:",status)
+    print("total steps:",len(simulator.records))
+    print("final x:",vehicle.x)
+    print("final y:",vehicle.y)
+    print("final heading:",vehicle.heading_degrees)
 #    project_root = Path(__file__).resolve().parent
 #    print("Autocar simulator project initialized.")
 #    data_path = project_root / "data" / "train4dAll.txt"
