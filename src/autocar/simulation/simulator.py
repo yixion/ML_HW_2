@@ -30,6 +30,8 @@ class Simulator:
         self.records = []
 
     def step(self):
+        print("current position of vehicle:",self.vehicle.x,self.vehicle.y)
+        print("current boundary:",self.track.boundary)
         # 建立 input
         # 取得：前面、右方、左方的 distances
         cur_distances = measure_sensor_distances(self.vehicle,self.track.boundary)
@@ -51,9 +53,11 @@ class Simulator:
         features = features.reshape(1,features.shape[0])
         # 正規化 inputs
         features = self.scaler.transform(features)
-        # 用模型預測 steering
+        # 用模型預測 steering_degrees
         prediction = self.model.predict(features)
         prediction = np.clip(prediction,-40.0,40.0)
+        prediction = prediction.item()
+        # 紀錄狀態
         record = SimulationRecord(
                     x=self.vehicle.x,
                     y=self.vehicle.y,
@@ -62,8 +66,8 @@ class Simulator:
                     left_distance=cur_distances[1],
                     steering_degrees=prediction
                     )
-
         self.records.append(record)
+        # 車子前進
         self.vehicle.step(prediction)
         if vehicle_collides(self.vehicle,self.track.boundary):
             return "collision"
@@ -75,7 +79,9 @@ class Simulator:
     def run(self,max_steps=1000):
         if max_steps<=0:
             raise ValueError("pls enter psotive steps")
+        print("Start simulation...")
         for i in range(max_steps):
+            print(f"step{i}")
             status = self.step()
             if status == "goal":
                 return "goal"

@@ -141,6 +141,15 @@ def test_simulator_step_builds_expected_features(
     assert record.steering_degrees == pytest.approx(
         0.0
     )
+    assert np.isscalar(vehicle.x)
+    assert np.isscalar(vehicle.y)
+    assert np.isscalar(
+        vehicle.heading_degrees
+    )
+
+    assert np.isscalar(
+        simulator.records[0].steering_degrees
+    )
 def test_simulator_step_clips_steering():
     track = create_test_track()
     vehicle = Vehicle(
