@@ -167,3 +167,75 @@ def test_simulator_step_clips_steering():
         simulator.records[0].steering_degrees
         == pytest.approx(40.0)
     )
+@pytest.mark.parametrize(
+    "terminal_status",
+    [
+        "goal",
+        "collision",
+    ],
+)
+def test_run_stops_at_terminal_status(
+    terminal_status,
+):
+    simulator = Simulator(
+        track=None,
+        vehicle=None,
+        model=None,
+        scaler=None,
+    )
+
+    statuses = iter([
+        "running",
+        "running",
+        terminal_status,
+    ])
+    call_count = 0
+
+    def fake_step():
+        nonlocal call_count
+        call_count += 1
+        return next(statuses)
+
+    simulator.step = fake_step
+
+    result = simulator.run(max_steps=10)
+
+    assert result == terminal_status
+    assert call_count == 3
+def test_run_stops_at_max_steps():
+    simulator = Simulator(
+        track=None,
+        vehicle=None,
+        model=None,
+        scaler=None,
+    )
+
+    call_count = 0
+
+    def fake_step():
+        nonlocal call_count
+        call_count += 1
+        return "running"
+
+    simulator.step = fake_step
+
+    result = simulator.run(max_steps=4)
+
+    assert result == "max_steps"
+    assert call_count == 4
+@pytest.mark.parametrize(
+    "max_steps",
+    [0, -1],
+)
+def test_run_rejects_invalid_max_steps(
+    max_steps,
+):
+    simulator = Simulator(
+        track=None,
+        vehicle=None,
+        model=None,
+        scaler=None,
+    )
+
+    with pytest.raises(ValueError):
+        simulator.run(max_steps=max_steps)

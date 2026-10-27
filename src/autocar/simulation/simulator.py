@@ -72,8 +72,15 @@ class Simulator:
         else:
             return "running"
 
-
-
-
+    def run(self,max_steps=1000):
+        if max_steps<=0:
+            raise ValueError("pls enter psotive steps")
+        for i in range(max_steps):
+            status = self.step()
+            if status == "goal":
+                return "goal"
+            elif status == "collision":
+                return "collision"
+        return "max_steps"
 
 
