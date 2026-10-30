@@ -24,7 +24,11 @@ def save_model(path,model,scaler):
 
 
 def load_model(path):
-    with np.load(path,allow_pickle=False) as saved_data:
+    file_path = Path(path)
+    print("start loading model...")
+    if not file_path.is_file():
+       return None, None 
+    with np.load(file_path,allow_pickle=False) as saved_data:
         scaler = StandardScaler()
         scaler.mean_ = saved_data["scaler_mean"]
         scaler.scale_ = saved_data["scaler_scale"]

@@ -11,6 +11,7 @@ class Track:
     boundary:np.ndarray
 
 def load_track(path):
+    print("getting track data...")
     path = Path(path).expanduser().resolve()
     with open(path, mode="r", encoding="utf-8") as file:
         lines = file.readlines()
@@ -31,6 +32,9 @@ def load_track(path):
                 goal_bottom_right=track_data[2],
                 boundary=np.array(track_data[3:],dtype=float)
             )
+    print("start position:", track.start_position)
+    print("goal_top_left:", track.goal_top_left)
+    print("boudnary:", track.boundary)
     return track
 
 if __name__ == "__main__":

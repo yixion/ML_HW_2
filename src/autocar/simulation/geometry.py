@@ -12,7 +12,6 @@ def ray_segment_intersection_distance(
     difference = segment_start - ray_origin
     denominator = cross_2d(ray_direction,s)
     if np.isclose(denominator,0.0):
-        print("no intersection")
         return None
     t = cross_2d(difference,s)/denominator
     u = cross_2d(difference,ray_direction)/denominator

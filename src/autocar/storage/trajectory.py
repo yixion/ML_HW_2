@@ -2,6 +2,10 @@ from autocar.simulation.simulator import SimulationRecord
 from pathlib import Path
 import numpy as np
 
+# simulation record: x,y, front_distance, right_distance, left_distance, steering_degrees
+# 根據不同 dimention 的 model 儲存對應的 data
+# 4D 前方距離、右方距離、左方距離、方向盤得出角度
+# 6D x, y, 前方距離、右方距離、左方距離、方向盤得出角度
 
 def save_4d_trajectory(path,records):
     if len(records) == 0:
