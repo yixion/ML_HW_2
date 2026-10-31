@@ -29,6 +29,7 @@
 本專案已在以下環境測試：
 
 - Ubuntu on WSL2
+    - "Ubuntu 26.04 LTS"
 - Python 3.14.4
 - NumPy 2.5.4
 - Pytest 9.1.1
