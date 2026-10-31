@@ -52,7 +52,8 @@ source .venv/bin/activate
 安裝相依套件：
 
 ```bash
-python -m pip install -r requirements.txt
+python -m pip install numpy
+python -m pip install pytest
 ```
 
 如果 Ubuntu／WSL 缺少 Tkinter：
@@ -79,6 +80,12 @@ PYTHONPATH=src python main.py
 5. 儲存成功抵達終點的軌跡。
 6. 開啟 Tkinter GUI。
 7. 提供 4D 與 6D 模式的軌跡重播。
+
+執行測式
+
+```bash
+PYTHONPATH=src python -m pytest -v
+```
 
 ## GUI 操作
 
