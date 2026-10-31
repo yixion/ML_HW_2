@@ -4,31 +4,32 @@ from autocar.simulation.simulator import Simulator
 from autocar.simulation.vehicle import Vehicle
 from autocar.simulation.track import load_track
 from autocar.storage.trajectory import(save_4d_trajectory,save_6d_trajectory, load_4d_trajectory, load_6d_trajectory)
-from autocar.simulation.replay import replay_4d_trajectory
+from autocar.simulation.replay import (replay_4d_trajectory,replay_6d_trajectory)
 from autocar.gui.app import AutocarApp
 import tkinter as tk
 from pathlib import Path
 
 def main() -> None:
+    # setting path parameter for latter use
     project_root = Path(__file__).resolve().parent
     track_path = project_root / "data"/ "track.txt"
-    model_path = project_root / "models" / "mlp_4d.npz" 
-    data_path = project_root / "data" / "train4dAll.txt"
-    output_path = project_root / "outputs"/ "track4D.txt"
+    model_4d_path = project_root / "models" / "mlp_4d.npz" 
+    data_4d_path = project_root / "data" / "train4dAll.txt"
+    trajectory_4d_output_path = project_root / "outputs"/ "track4D.txt"
     # loading track data
     track = load_track(track_path)
     # 4D mlp
-    model,scaler = load_model(model_path)
+    model,scaler = load_model(model_4d_path)
     if model is None and scaler is None:
-        model, scaler, loss_history, matrics = train_4d_model(data_path)
-        save_model(model_path,model, scaler)  
+        model, scaler, loss_history, matrics = train_4d_model(data_4d_path)
+        save_model(model_4d_path,model, scaler)  
     # create vehicle object 
     vehicle = Vehicle(track.start_position[0], track.start_position[1],track.start_position[2])
 
     simulator = Simulator(track, vehicle, model, scaler) 
     status = simulator.run(max_steps=1000,)
     if status == "goal":
-        save_4d_trajectory(output_path,simulator.records)
+        save_4d_trajectory(trajectory_4d_output_path,simulator.records)
     print("status:",status)
     print("total steps:",len(simulator.records))
     print("final x:",vehicle.x)
@@ -36,26 +37,30 @@ def main() -> None:
     print("final heading:",vehicle.heading_degrees)
 
     #6Dmlp
-#    model_path = project_root / "models" / "mlp_6d.npz" 
-#    data_path = project_root / "data" / "train6dAll.txt"
-#    output_path = project_root / "outputs"/ "track6D.txt"
-#    model,scaler = load_model(model_path)
-#    if model is None and scaler is None:
-#        model, scaler, loss_history, matrics = train_6d_model(data_path)
-#        save_model(model_path,model, scaler)  
-#    # create vehicle object 
-#    vehicle = Vehicle(track.start_position[0], track.start_position[1],track.start_position[2])
-#
-#    simulator = Simulator(track, vehicle, model, scaler) 
-#    status = simulator.run(max_steps=1000,)
-#    if status == "goal":
-#        save_6d_trajectory(output_path,simulator.records)
-#    print("status:",status)
-#    print("total steps:",len(simulator.records))
-#    print("final x:",vehicle.x)
-#    print("final y:",vehicle.y)
-#    print("final heading:",vehicle.heading_degrees)
-#
+    model_6d_path = project_root / "models" / "mlp_6d.npz" 
+    data_6d_path = project_root / "data" / "train6dAll.txt"
+    trajectory_6d_output_path  = project_root / "outputs"/ "track6D.txt"
+    model,scaler = load_model(model_6d_path)
+    if model is None and scaler is None:
+        model, scaler, loss_history, matrics = train_6d_model(data_6d_path)
+        save_model(model_6d_path,model, scaler)  
+    # create vehicle object 
+    vehicle = Vehicle(track.start_position[0], track.start_position[1],track.start_position[2])
+
+    simulator = Simulator(track, vehicle, model, scaler) 
+    status = simulator.run(max_steps=1000,)
+    if status == "goal":
+        save_6d_trajectory(trajectory_6d_output_path ,simulator.records)
+    print("status:",status)
+    print("total steps:",len(simulator.records))
+    print("final x:",vehicle.x)
+    print("final y:",vehicle.y)
+    print("final heading:",vehicle.heading_degrees)
+
+    frames_4d = replay_4d_trajectory(track,load_4d_trajectory(trajectory_4d_output_path))
+    frames_6d = replay_6d_trajectory(track,load_6d_trajectory(trajectory_6d_output_path))
+
+
     print("prepare window")
     root = tk.Tk()
     root.title("Autocar Simulatior")
@@ -64,8 +69,7 @@ def main() -> None:
     print("window has constructed")
     app = AutocarApp(root_window=root,track=track)
     app.draw_track()
-    frames = replay_4d_trajectory(track,load_4d_trajectory(output_path))
-    app.start_replay(frames)
+    app.set_replay_frames(frames_4d,frames_6d)
     root.mainloop()
     print("window has close down")
 

@@ -248,3 +248,59 @@ def test_run_rejects_invalid_max_steps(
 
     with pytest.raises(ValueError):
         simulator.run(max_steps=max_steps)
+
+def test_simulator_record_preserves_sensor_order():
+    track = create_test_track()
+
+    # 故意放在偏右的位置，讓左右距離不同
+    vehicle = Vehicle(
+        x=1.0,
+        y=0.0,
+        heading_degrees=90.0,
+    )
+
+    scaler = RecordingScaler()
+
+    model = ConstantModel(
+        input_size=3,
+        prediction=0.0,
+    )
+
+    simulator = Simulator(
+        track=track,
+        vehicle=vehicle,
+        model=model,
+        scaler=scaler,
+    )
+
+    status = simulator.step()
+
+    assert status == "running"
+    assert len(simulator.records) == 1
+
+    record = simulator.records[0]
+
+    expected_front = 10.0
+    expected_right = np.sqrt(32.0)
+    expected_left = np.sqrt(72.0)
+
+    # 確認送進模型的順序
+    np.testing.assert_allclose(
+        scaler.received_features,
+        np.array([[
+            expected_front,
+            expected_right,
+            expected_left,
+        ]]),
+    )
+
+    # 確認 SimulationRecord 的順序
+    assert record.front_distance == pytest.approx(
+        expected_front
+    )
+    assert record.right_distance == pytest.approx(
+        expected_right
+    )
+    assert record.left_distance == pytest.approx(
+        expected_left
+    )

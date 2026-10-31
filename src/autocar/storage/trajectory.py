@@ -26,7 +26,6 @@ def save_6d_trajectory(path,records):
 def _load_trajectory(path,expected_columns):
     path = Path(path) 
     trajectory_data = np.loadtxt(path,ndmin=2)
-    print(type(trajectory_data))
     if trajectory_data.shape[1] != expected_columns or not np.isfinite(trajectory_data).all():
         raise ValueError("loading trajectory Error")
     return trajectory_data
