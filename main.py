@@ -34,18 +34,7 @@ def main() -> None:
     print("final x:",vehicle.x)
     print("final y:",vehicle.y)
     print("final heading:",vehicle.heading_degrees)
-    print("prepare window")
-    root = tk.Tk()
-    root.title("Autocar Simulatior")
-    root.geometry("900x700")
-    #root.resizable(False,False)
-    print("window has constructed")
-    app = AutocarApp(root_window=root,track=track)
-    app.draw_track()
-    frames = replay_4d_trajectory(track,load_4d_trajectory(output_path))
-    app.start_replay(frames)
-    root.mainloop()
-    print("window has close down")
+
     #6Dmlp
 #    model_path = project_root / "models" / "mlp_6d.npz" 
 #    data_path = project_root / "data" / "train6dAll.txt"
@@ -67,6 +56,20 @@ def main() -> None:
 #    print("final y:",vehicle.y)
 #    print("final heading:",vehicle.heading_degrees)
 #
+    print("prepare window")
+    root = tk.Tk()
+    root.title("Autocar Simulatior")
+    root.geometry("900x700")
+    #root.resizable(False,False)
+    print("window has constructed")
+    app = AutocarApp(root_window=root,track=track)
+    app.draw_track()
+    frames = replay_4d_trajectory(track,load_4d_trajectory(output_path))
+    app.start_replay(frames)
+    root.mainloop()
+    print("window has close down")
+
+
 
 #    project_root = Path(__file__).resolve().parent
 #    print("Autocar simulator project initialized.")

@@ -35,7 +35,7 @@ class AutocarApp:
             x, y = self.w2c(track.boundary[i][0],
                             track.boundary[i][1])
             track_points.extend([x,y])
-        self.canvas.create_line(*track_points, width=10, fill='#118AB2', joinstyle=tk.ROUND,capstyle=tk.ROUND)
+        self.canvas.create_line(*track_points, width=5, fill='#118AB2', joinstyle=tk.ROUND,capstyle=tk.ROUND)
         # draw goal area
         goal_boundary = self.goal_boundary
         start_x, start_y = self.w2c(goal_boundary[0][0],
@@ -46,13 +46,16 @@ class AutocarApp:
         # draw car
         x,y = self.w2c(track.start_position[0], track.start_position[1])
         r = 3.0 * self.scale
-        self.car_id = self.canvas.create_oval(x-r,y-r, x+r, y+r, fill='#F2F2ED')
+        self.car_id = self.canvas.create_oval(x-r,y-r, x+r, y+r, fill='#FBEC5D')
         # draw sensor
         self.sensor_line_ids = [
                 self.canvas.create_line(0,0,0,0, fill="red", width=2),
                 self.canvas.create_line(0,0,0,0, fill="green",width=2),
                 self.canvas.create_line(0,0,0,0, fill="blue", width=2),
                 ]
+        # draw live data
+        text = "front distance:\n"+"right_distance:\n"+"left_distance:\n"+"poisition:\n"+"degree:\n"
+        self.info_text_id = self.canvas.create_text(self.canvas_width-self.padding,self.padding,text=text, anchor='ne', fill='#F2F2ED', font=('Arial', 12))
         
     def start_replay(self,frames, delay_ms=100):
        self.frames = frames
@@ -92,7 +95,15 @@ class AutocarApp:
         for line_id, (end_x,end_y) in zip(self.sensor_line_ids, end_points):
             self.canvas.coords(line_id, x, y, end_x, end_y)
 
-
+        # update text on the screate
+        text = (
+            f"front distance: {f.front_distance:.2f}\n"
+            f"right distance: {f.right_distance:.2f}\n"
+            f"left distance: {f.left_distance:.2f}\n"
+            f"position: {f.x:.2f}, {f.y:.2f}\n"
+            f"degree: {f.heading_degrees:.2f}\n"
+        )
+        self.canvas.itemconfig(self.info_text_id, text=text)
         self.cur_index += 1
         self.root.after(
                 self.delay_ms,
