@@ -62,8 +62,8 @@ class Simulator:
                     x=self.vehicle.x,
                     y=self.vehicle.y,
                     front_distance=cur_distances[0],
-                    right_distance=cur_distances[2],
-                    left_distance=cur_distances[1],
+                    right_distance=cur_distances[1],
+                    left_distance=cur_distances[2],
                     steering_degrees=prediction
                     )
         self.records.append(record)
